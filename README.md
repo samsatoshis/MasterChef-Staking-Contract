@@ -2,6 +2,59 @@
 
 A gas-optimized, infinitely scalable staking contract using the proven **MasterChef pattern** for native token (ETH/BNB/MATIC) reward distribution.
 
+## Table of Contents
+
+- [Features](#features)
+- [What is MasterChef Staking?](#what-is-masterchef-staking)
+  - [The Problem with Traditional Approaches](#the-problem-with-traditional-approaches)
+  - [The MasterChef Solution](#the-masterchef-solution)
+  - [Why It's Called "MasterChef"](#why-its-called-masterchef)
+- [Who Uses MasterChef?](#who-uses-masterchef)
+  - [Major Protocols Using MasterChef](#major-protocols-using-masterchef)
+  - [Why These Protocols Chose MasterChef](#why-these-protocols-chose-masterchef)
+- [How This Contract Works](#how-this-contract-works)
+  - [The Core Algorithm](#the-core-algorithm)
+  - [Visual Example](#visual-example)
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Ethereum Configuration](#ethereum-configuration)
+  - [BNB Smart Chain Configuration](#bnb-smart-chain-configuration)
+  - [Base Configuration](#base-configuration)
+  - [Polygon Configuration](#polygon-configuration)
+  - [Arbitrum Configuration](#arbitrum-configuration)
+  - [Configuration Notes](#configuration-notes)
+- [Usage](#usage)
+  - [Compile Contracts](#compile-contracts)
+  - [Run Tests](#run-tests)
+  - [Deploy](#deploy)
+    - [Local Development](#local-development)
+    - [Ethereum](#ethereum)
+    - [BNB Smart Chain](#bnb-smart-chain)
+    - [Base](#base)
+    - [Polygon](#polygon)
+    - [Arbitrum](#arbitrum)
+  - [Contract Verification](#contract-verification)
+    - [Ethereum (Etherscan)](#ethereum-etherscan)
+    - [BNB Smart Chain (BSCScan)](#bnb-smart-chain-bscscan)
+    - [Base (Basescan)](#base-basescan)
+    - [Polygon (Polygonscan)](#polygon-polygonscan)
+    - [Arbitrum (Arbiscan)](#arbitrum-arbiscan)
+    - [Verification Example](#verification-example)
+- [Contract Interface](#contract-interface)
+  - [Core Functions](#core-functions)
+  - [View Functions](#view-functions)
+  - [Reward Distribution](#reward-distribution)
+- [Frontend Integration](#frontend-integration)
+- [Security Features](#security-features)
+- [Gas Comparison](#gas-comparison)
+- [Constructor Parameters](#constructor-parameters)
+- [Constants](#constants)
+- [Supported Networks](#supported-networks)
+- [Testing](#testing)
+- [License](#license)
+- [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
+
 ## Features
 
 - **Infinite Scalability** - O(1) operations, no loops, works with millions of users
@@ -130,8 +183,8 @@ Result: Alice got 10 + 10 = 20 ETH, Bob got 10 ETH. Fair! ✓
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/masterchef-staking.git
-cd masterchef-staking
+git clone https://github.com/samsatoshis/MasterChef-Staking-Contract.git
+cd MasterChef-Staking-Contract
 
 # Install dependencies
 npm install
@@ -142,23 +195,167 @@ cp .env.example .env
 
 ## Configuration
 
-Create a `.env` file with your configuration:
+Create a `.env` file based on the network you want to deploy to:
+
+### Ethereum Configuration
 
 ```env
-# Required for deployment
+# Wallet
 PRIVATE_KEY=your_private_key_here
+
+# Staking token address
 STAKING_TOKEN_ADDRESS=0x...
 
-# Optional - eligibility delay in seconds (default: 3 days = 259200)
+# Eligibility delay (optional, default: 3 days = 259200 seconds)
 ELIGIBILITY_DELAY=259200
 
-# Network RPC URLs (optional - defaults provided)
+# Ethereum RPC URLs
 SEPOLIA_URL=https://rpc.sepolia.org
 MAINNET_URL=https://eth.llamarpc.com
 
-# For contract verification (optional)
+# Contract verification
 ETHERSCAN_API_KEY=your_etherscan_api_key
 ```
+
+**Deploy commands:**
+```bash
+# Testnet (Sepolia)
+npx hardhat run scripts/deploy.js --network sepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network mainnet
+```
+
+### BNB Smart Chain Configuration
+
+```env
+# Wallet
+PRIVATE_KEY=your_private_key_here
+
+# Staking token address (BEP-20)
+STAKING_TOKEN_ADDRESS=0x...
+
+# Eligibility delay (optional)
+ELIGIBILITY_DELAY=259200
+
+# BSC RPC URLs
+BSC_TESTNET_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
+BSC_MAINNET_URL=https://bsc-dataseed1.binance.org/
+
+# Contract verification
+BSCSCAN_API_KEY=your_bscscan_api_key
+```
+
+**Deploy commands:**
+```bash
+# Testnet
+npx hardhat run scripts/deploy.js --network bscTestnet
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network bscMainnet
+```
+
+### Base Configuration
+
+```env
+# Wallet
+PRIVATE_KEY=your_private_key_here
+
+# Staking token address
+STAKING_TOKEN_ADDRESS=0x...
+
+# Eligibility delay (optional)
+ELIGIBILITY_DELAY=259200
+
+# Base RPC URLs
+BASE_SEPOLIA_URL=https://sepolia.base.org
+BASE_URL=https://mainnet.base.org
+
+# Contract verification
+BASESCAN_API_KEY=your_basescan_api_key
+```
+
+**Deploy commands:**
+```bash
+# Testnet (Base Sepolia)
+npx hardhat run scripts/deploy.js --network baseSepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network base
+```
+
+### Polygon Configuration
+
+```env
+# Wallet
+PRIVATE_KEY=your_private_key_here
+
+# Staking token address
+STAKING_TOKEN_ADDRESS=0x...
+
+# Eligibility delay (optional)
+ELIGIBILITY_DELAY=259200
+
+# Polygon RPC URLs
+POLYGON_AMOY_URL=https://rpc-amoy.polygon.technology
+POLYGON_URL=https://polygon-rpc.com
+
+# Contract verification
+POLYGONSCAN_API_KEY=your_polygonscan_api_key
+```
+
+**Deploy commands:**
+```bash
+# Testnet (Amoy)
+npx hardhat run scripts/deploy.js --network polygonAmoy
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network polygon
+```
+
+### Arbitrum Configuration
+
+```env
+# Wallet
+PRIVATE_KEY=your_private_key_here
+
+# Staking token address
+STAKING_TOKEN_ADDRESS=0x...
+
+# Eligibility delay (optional)
+ELIGIBILITY_DELAY=259200
+
+# Arbitrum RPC URLs
+ARBITRUM_SEPOLIA_URL=https://sepolia-rollup.arbitrum.io/rpc
+ARBITRUM_URL=https://arb1.arbitrum.io/rpc
+
+# Contract verification
+ARBISCAN_API_KEY=your_arbiscan_api_key
+```
+
+**Deploy commands:**
+```bash
+# Testnet (Arbitrum Sepolia)
+npx hardhat run scripts/deploy.js --network arbitrumSepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network arbitrum
+```
+
+### Configuration Notes
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `PRIVATE_KEY` | Your wallet private key (without 0x prefix) | Required |
+| `STAKING_TOKEN_ADDRESS` | ERC20/BEP20 token address to stake | Required |
+| `ELIGIBILITY_DELAY` | Seconds before stakers can claim rewards | 259200 (3 days) |
+
+**Common Eligibility Delay Values:**
+- `0` - No delay (immediate rewards)
+- `3600` - 1 hour
+- `86400` - 1 day
+- `259200` - 3 days (recommended for anti-frontrunning)
+- `604800` - 7 days
 
 ## Usage
 
@@ -176,26 +373,125 @@ npm test
 
 ### Deploy
 
+#### Local Development
+
 ```bash
-# Local network
-npm run deploy
+# Start local node
+npx hardhat node
 
-# Sepolia testnet
-STAKING_TOKEN_ADDRESS=0x... npm run deploy:sepolia
+# Deploy to local network (in another terminal)
+npx hardhat run scripts/deploy.js --network localhost
+```
 
-# Ethereum mainnet
-STAKING_TOKEN_ADDRESS=0x... npm run deploy:mainnet
+#### Ethereum
 
-# Custom eligibility delay (1 hour)
-STAKING_TOKEN_ADDRESS=0x... ELIGIBILITY_DELAY=3600 npm run deploy:sepolia
+```bash
+# Testnet (Sepolia)
+npx hardhat run scripts/deploy.js --network sepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network mainnet
+```
+
+#### BNB Smart Chain
+
+```bash
+# Testnet
+npx hardhat run scripts/deploy.js --network bscTestnet
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network bscMainnet
+```
+
+#### Base
+
+```bash
+# Testnet (Base Sepolia)
+npx hardhat run scripts/deploy.js --network baseSepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network base
+```
+
+#### Polygon
+
+```bash
+# Testnet (Amoy)
+npx hardhat run scripts/deploy.js --network polygonAmoy
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network polygon
+```
+
+#### Arbitrum
+
+```bash
+# Testnet (Arbitrum Sepolia)
+npx hardhat run scripts/deploy.js --network arbitrumSepolia
+
+# Mainnet
+npx hardhat run scripts/deploy.js --network arbitrum
 ```
 
 ### Contract Verification
 
-After deployment, verify on block explorer:
+After deployment, verify your contract on the block explorer. Replace the placeholders with your actual values.
+
+#### Ethereum (Etherscan)
 
 ```bash
+# Sepolia
 npx hardhat verify --network sepolia <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+
+# Mainnet
+npx hardhat verify --network mainnet <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+```
+
+#### BNB Smart Chain (BSCScan)
+
+```bash
+# Testnet
+npx hardhat verify --network bscTestnet <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+
+# Mainnet
+npx hardhat verify --network bscMainnet <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+```
+
+#### Base (Basescan)
+
+```bash
+# Base Sepolia
+npx hardhat verify --network baseSepolia <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+
+# Mainnet
+npx hardhat verify --network base <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+```
+
+#### Polygon (Polygonscan)
+
+```bash
+# Amoy
+npx hardhat verify --network polygonAmoy <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+
+# Mainnet
+npx hardhat verify --network polygon <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+```
+
+#### Arbitrum (Arbiscan)
+
+```bash
+# Arbitrum Sepolia
+npx hardhat verify --network arbitrumSepolia <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+
+# Mainnet
+npx hardhat verify --network arbitrum <CONTRACT_ADDRESS> "<TOKEN_ADDRESS>" "<ELIGIBILITY_DELAY>"
+```
+
+#### Verification Example
+
+```bash
+# Example: Verify on BSC Mainnet with 3-day eligibility delay
+npx hardhat verify --network bscMainnet 0x1234...abcd "0xYourTokenAddress" "259200"
 ```
 
 ## Contract Interface
