@@ -1,0 +1,38 @@
+{
+  "name": "masterchef-staking",
+  "version": "1.0.0",
+  "description": "A gas-optimized, scalable staking contract using the MasterChef pattern for native token (ETH/BNB) reward distribution",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network mainnet",
+    "clean": "npx hardhat clean"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "staking",
+    "masterchef",
+    "defi",
+    "ethereum",
+    "solidity",
+    "smart-contracts",
+    "erc20",
+    "rewards"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.1.1",
+    "@openzeppelin/contracts": "^5.3.0",
+    "dotenv": "^16.5.0",
+    "hardhat": "^2.24.0"
+  }
+}
