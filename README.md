@@ -9,6 +9,17 @@ A gas-optimized, infinitely scalable staking contract using the proven **MasterC
   - [The Problem with Traditional Approaches](#the-problem-with-traditional-approaches)
   - [The MasterChef Solution](#the-masterchef-solution)
   - [Why It's Called "MasterChef"](#why-its-called-masterchef)
+- [How Is This Different from SushiSwap's MasterChef?](#how-is-this-different-from-sushiswaps-masterchef)
+  - [When to Use SushiSwap's MasterChef](#when-to-use-sushiswaps-masterchef)
+  - [When to Use This Contract](#when-to-use-this-contract)
+- [Use Cases](#use-cases)
+  - [1. Platform Fee Distribution](#1-platform-fee-distribution)
+  - [2. NFT Marketplace Revenue Sharing](#2-nft-marketplace-revenue-sharing)
+  - [3. GameFi Profit Distribution](#3-gamefi-profit-distribution)
+  - [4. DeFi Protocol Fee Sharing](#4-defi-protocol-fee-sharing)
+  - [5. DAO Treasury Distribution](#5-dao-treasury-distribution)
+- [Integration Example](#integration-example)
+- [Reward Flow Diagram](#reward-flow-diagram)
 - [Who Uses MasterChef?](#who-uses-masterchef)
   - [Major Protocols Using MasterChef](#major-protocols-using-masterchef)
   - [Why These Protocols Chose MasterChef](#why-these-protocols-chose-masterchef)
@@ -104,6 +115,205 @@ This elegant formula means:
 ### Why It's Called "MasterChef"
 
 The name comes from SushiSwap's original contract that distributed SUSHI tokens to liquidity providers. The "chef" metaphor represents the contract as a chef distributing "rewards" (food) to "stakers" (diners) fairly based on how much they contributed.
+
+## How Is This Different from SushiSwap's MasterChef?
+
+This is a common question. While both contracts use the same mathematical pattern, they serve **completely different purposes**:
+
+| Aspect | SushiSwap MasterChef | This Contract |
+|--------|---------------------|---------------|
+| **Reward Type** | Mints new tokens (inflationary) | Distributes native tokens (ETH/BNB/MATIC) |
+| **Purpose** | DEX liquidity mining | Revenue sharing with token holders |
+| **Complexity** | Multi-pool, migrator, dev tax, bonus periods | Single-purpose, simple, ready to deploy |
+
+### When to Use SushiSwap's MasterChef
+- You're building a DEX and need to mint reward tokens
+- You need multiple pools with different allocation weights
+- You want inflationary tokenomics with emission schedules
+
+### When to Use This Contract
+- You want to **share revenue** (fees, profits) with your token stakers
+- You have an existing token and want to reward holders with ETH/BNB/MATIC
+- You want a simple, single-pool staking solution
+
+## Use Cases
+
+This contract is designed for **revenue sharing** - distributing native tokens (ETH/BNB/MATIC) to stakers of your project's token. Here are practical examples:
+
+### 1. Platform Fee Distribution
+
+Your platform collects fees in native tokens and distributes them to token stakers.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      YOUR PLATFORM                          │
+│                                                             │
+│  User pays 0.1 ETH fee  ──►  Platform takes fee             │
+│                                      │                      │
+│                                      ▼                      │
+│                         ┌────────────────────┐              │
+│                         │  Staking Contract  │              │
+│                         │  (this contract)   │              │
+│                         └────────────────────┘              │
+│                                      │                      │
+│                                      ▼                      │
+│                         Distributed to all $TOKEN stakers   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Example flow:**
+1. Deploy your ERC20 token ($TOKEN)
+2. Deploy this staking contract with your token address
+3. Users stake $TOKEN to earn ETH/BNB rewards
+4. Your platform sends fees to the staking contract
+5. Rewards are automatically distributed proportionally
+
+```solidity
+// In your platform contract, send fees to staking contract
+function collectFee() external payable {
+    uint256 platformFee = msg.value;
+
+    // Send to staking contract - rewards are auto-distributed
+    (bool success, ) = stakingContract.call{value: platformFee}("");
+    require(success, "Transfer failed");
+}
+```
+
+### 2. NFT Marketplace Revenue Sharing
+
+An NFT marketplace shares trading fees with governance token holders.
+
+```
+NFT Sale (1 ETH)
+      │
+      ▼
+┌─────────────────┐
+│  2.5% Fee       │ = 0.025 ETH
+└─────────────────┘
+      │
+      ▼
+┌─────────────────┐
+│ Staking Contract│ ──► Distributed to $MARKET token stakers
+└─────────────────┘
+```
+
+### 3. GameFi Profit Distribution
+
+A blockchain game distributes in-game purchase revenue to token stakers.
+
+```javascript
+// Weekly distribution from game treasury
+async function distributeWeeklyRewards() {
+    const weeklyRevenue = await getWeeklyRevenue(); // e.g., 10 BNB
+
+    await stakingContract.addRewards({ value: weeklyRevenue });
+
+    console.log(`Distributed ${weeklyRevenue} BNB to stakers`);
+}
+```
+
+### 4. DeFi Protocol Fee Sharing
+
+A lending protocol shares interest fees with governance token stakers.
+
+### 5. DAO Treasury Distribution
+
+A DAO distributes treasury earnings to token holders who stake.
+
+## Integration Example
+
+Here's a complete example of integrating the staking contract with your platform:
+
+### Step 1: Deploy Your Token
+
+```solidity
+// Your existing ERC20 token
+contract MyToken is ERC20 {
+    constructor() ERC20("My Token", "MTK") {
+        _mint(msg.sender, 1000000 * 10**18);
+    }
+}
+```
+
+### Step 2: Deploy Staking Contract
+
+```bash
+STAKING_TOKEN_ADDRESS=0xYourTokenAddress ELIGIBILITY_DELAY=259200 npx hardhat run scripts/deploy.js --network mainnet
+```
+
+### Step 3: Send Rewards from Your Platform
+
+```solidity
+// Your platform contract
+contract MyPlatform {
+    address public stakingContract;
+
+    constructor(address _stakingContract) {
+        stakingContract = _stakingContract;
+    }
+
+    // Example: User performs action, pays fee
+    function doSomething() external payable {
+        require(msg.value >= 0.01 ether, "Min fee required");
+
+        // Send fee to staking contract
+        (bool success, ) = stakingContract.call{value: msg.value}("");
+        require(success, "Fee transfer failed");
+    }
+}
+```
+
+### Step 4: Users Stake and Earn
+
+```javascript
+// Frontend integration
+const { ethers } = require("ethers");
+
+// User stakes tokens
+await myToken.approve(stakingContract.address, stakeAmount);
+await stakingContract.stake(stakeAmount);
+
+// Check pending rewards
+const pending = await stakingContract.pendingRewards(userAddress);
+console.log(`Pending: ${ethers.formatEther(pending)} ETH`);
+
+// Claim rewards
+await stakingContract.claimRewards();
+```
+
+## Reward Flow Diagram
+
+```
+                                YOUR PLATFORM
+                                     │
+                    ┌────────────────┼────────────────┐
+                    │                │                │
+                    ▼                ▼                ▼
+              Trading Fees    Service Fees    Other Revenue
+                    │                │                │
+                    └────────────────┼────────────────┘
+                                     │
+                                     ▼
+                         ┌───────────────────────┐
+                         │   stakingContract     │
+                         │     .addRewards()     │
+                         │         or            │
+                         │   receive() payable   │
+                         └───────────────────────┘
+                                     │
+                    ┌────────────────┼────────────────┐
+                    │                │                │
+                    ▼                ▼                ▼
+               ┌─────────┐     ┌─────────┐     ┌─────────┐
+               │ Staker  │     │ Staker  │     │ Staker  │
+               │  1000   │     │  2000   │     │  3000   │
+               │ tokens  │     │ tokens  │     │ tokens  │
+               └─────────┘     └─────────┘     └─────────┘
+                   │                │                │
+                   ▼                ▼                ▼
+               16.6% of         33.3% of         50% of
+               rewards          rewards          rewards
+```
 
 ## Who Uses MasterChef?
 
